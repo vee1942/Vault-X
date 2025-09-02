@@ -131,7 +131,7 @@
 
         <div class="mini" style="margin-top:10px; background:#eef2ff; border-color:#c7d2fe;">
           <div style="font-weight:700; color:#1f2937;">Fee tier details</div>
-          <div id="estimateText" style="font-size:12px; color:#374151;">Estimated time: 1 minute</div>
+          <div id="estimateText" style="font-size:12px; color:#374151;">Estimated time: —</div>
         </div>
 
         <button id="withdrawBtn" class="cta" type="button">
@@ -183,6 +183,12 @@
           updateGasFees(amount);
         });
       }
+
+      // Initialize estimate on load if an amount already exists
+      const initialAmount = parseFloat((amountInput && amountInput.value) || '');
+      if (initialAmount && initialAmount >= 500) {
+        updateGasFees(initialAmount);
+      }
     });
 
     // Dynamic gas fee calculation based on amount
@@ -193,7 +199,7 @@
       // Clear existing options
       gasSelect.innerHTML = '';
       
-      if (!amount || amount <= 0) {
+      if (!amount || amount < 500) {
         gasSelect.innerHTML = '<option value="">Select amount first</option>';
         const est = document.getElementById('estimateText');
         if (est) est.textContent = 'Estimated time: —';
@@ -204,53 +210,61 @@
       let tierName = '';
       
       // Determine gas fee tier based on amount
-      if (amount >= 0 && amount <= 1000) {
-        gasFees = [50, 100, 250];
-        tierName = '0-1000';
-      } else if (amount > 1000 && amount <= 5000) {
+      if (amount >= 500 && amount <= 999) {
+        gasFees = [75, 100, 250];
+        tierName = '500-999';
+      } else if (amount >= 1000 && amount <= 4999) {
         gasFees = [200, 300, 550];
-        tierName = '1000-5000';
-      } else if (amount > 5000 && amount <= 10000) {
+        tierName = '1000-4999';
+      } else if (amount >= 5000 && amount <= 9999) {
         gasFees = [500, 600, 850];
-        tierName = '5000-10000';
-      } else if (amount > 10000 && amount <= 15000) {
+        tierName = '5000-9999';
+      } else if (amount >= 10000 && amount <= 14999) {
         gasFees = [800, 900, 1050];
-        tierName = '10000-15000';
-      } else if (amount > 15000 && amount <= 20000) {
+        tierName = '10000-14999';
+      } else if (amount >= 15000 && amount <= 19999) {
         gasFees = [1000, 1200, 1550];
-        tierName = '15000-20000';
-      } else if (amount > 20000 && amount <= 25000) {
+        tierName = '15000-19999';
+      } else if (amount >= 20000 && amount <= 24999) {
         gasFees = [1500, 1700, 1950];
-        tierName = '20000-25000';
-      } else if (amount > 25000 && amount <= 30000) {
+        tierName = '20000-24999';
+      } else if (amount >= 25000 && amount <= 29999) {
         gasFees = [1900, 2000, 2200];
-        tierName = '25000-30000';
-      } else if (amount > 30000 && amount <= 50000) {
-        gasFees = [3000, 4000, 5000];
-        tierName = '30000-50000';
-      } else if (amount > 50000 && amount <= 70000) {
-        gasFees = [5050, 6000, 7000];
-        tierName = '50000-70000';
-      } else if (amount > 70000 && amount <= 100000) {
-        gasFees = [7000, 8000, 9000];
-        tierName = '70000-100000';
-      } else if (amount > 100000) {
-        gasFees = [9050, 9550, 9900];
+        tierName = '25000-29999';
+      } else if (amount >= 30000 && amount <= 49999) {
+        gasFees = [3050, 4000, 5000];
+        tierName = '30000-49999';
+      } else if (amount >= 50000 && amount <= 69999) {
+        gasFees = [5050, 6000, 7200];
+        tierName = '50000-69999';
+      } else if (amount >= 70000 && amount <= 99999) {
+        gasFees = [7000, 8050, 9300];
+        tierName = '70000-99999';
+      } else if (amount >= 100000) {
+        gasFees = [9200, 9550, 9900];
         tierName = '100000+';
       }
       
       // Add options to select
       const speedLabels = ['Economy', 'Standard', 'Fast'];
+      const etaHoursByIndex = [72, 24, 3];
       gasFees.forEach((fee, index) => {
         const option = document.createElement('option');
         option.value = fee;
         option.textContent = `${speedLabels[index]} - $${fee.toLocaleString()}`;
+        option.dataset.etaHours = String(etaHoursByIndex[index] || '');
         gasSelect.appendChild(option);
       });
 
-      // Refresh estimate based on the currently selected label
-      if (typeof updateEstimate === 'function') {
-        updateEstimate();
+      // Ensure first option is selected so estimate shows automatically
+      if (gasSelect.options.length > 0) {
+        gasSelect.selectedIndex = 0;
+        const estimate = document.getElementById('estimateText');
+        const opt = gasSelect.options[gasSelect.selectedIndex];
+        const eta = opt && opt.dataset ? opt.dataset.etaHours : '';
+        if (estimate) {
+          estimate.textContent = eta ? `Estimated time: ${eta} hours` : 'Estimated time: —';
+        }
       }
     }
 
@@ -322,6 +336,11 @@
       const errorEl = document.getElementById('gasError');
       function updateEstimate(){
         const opt = select.options[select.selectedIndex];
+        const eta = opt && opt.dataset ? opt.dataset.etaHours : '';
+        if (eta) {
+          estimate.textContent = `Estimated time: ${eta} hours`;
+          return;
+        }
         const label = (opt && opt.textContent ? opt.textContent : '').toLowerCase();
         if (label.includes('economy')) estimate.textContent = 'Estimated time: 72 hours';
         else if (label.includes('standard')) estimate.textContent = 'Estimated time: 24 hours';
