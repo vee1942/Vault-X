@@ -25,7 +25,7 @@ db.serialize(() => {
     email TEXT UNIQUE,
     name TEXT,
     created_at INTEGER
-  )`);n
+  )`);
 
   db.run(`CREATE TABLE IF NOT EXISTS user_auth (
     uid TEXT PRIMARY KEY,
