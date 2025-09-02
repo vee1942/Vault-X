@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Options - DX Technologies</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-main: radial-gradient(120% 120% at 0% 0%, rgba(109,94,252,0.12) 0%, rgba(109,94,252,0) 40%), linear-gradient(180deg, #0a0f17, #06090f 70%);
+      --text: #e6e9ef;
+      --muted: #93a0b3;
+      --accent-primary: #6d5efc;
+      --accent-primary-2: #5a7bff;
+      --accent-red: #ff6a6a;
+      --accent-green: #23c55e;
+      --card-bg: linear-gradient(180deg, #0e1420, #0b101b);
+      --card-border: rgba(255,255,255,0.08);
+      --shadow: 0 24px 56px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-main);
+      min-height: 100vh;
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+    
+    .back-button {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-primary-2));
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(109, 94, 252, 0.3);
+    }
+    
+    .back-button::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+    
+    .logo {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+    
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+    
+    .option-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      border: 1px solid var(--card-border);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .option-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+      border-color: var(--accent-primary);
+    }
+    
+    .option-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-primary-2));
+    }
+    
+    .company-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    
+    .company-description {
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    
+    .price-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .current-price {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text);
+    }
+    
+    .price-change {
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    
+    .price-up {
+      background: rgba(52, 199, 89, 0.1);
+      color: #34c759;
+    }
+    
+    .price-down {
+      background: rgba(255, 59, 48, 0.1);
+      color: var(--accent-red);
+    }
+    
+    .option-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .detail-item {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+    
+    .detail-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .detail-value {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 0.25rem;
+    }
+    
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+    }
+    
+    .btn-buy {
+      background: linear-gradient(90deg, var(--accent-green), #33d17a);
+    }
+    
+    .btn-buy:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn-sell {
+      background: linear-gradient(90deg, var(--accent-red), #ff8a7a);
+    }
+    
+    .btn-sell:hover {
+      transform: translateY(-2px);
+    }
+    
+    .stats-section {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin-bottom: 2rem;
+      border: 1px solid var(--card-border);
+    }
+    
+    .stats-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .stat-item {
+      text-align: center;
+      padding: 1.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 15px;
+      border: 1px solid var(--card-border);
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.8rem;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    
+    .signature {
+      font-family: 'Brush Script MT', cursive;
+      font-size: 1.2rem;
+      color: var(--text);
+      margin-top: 1rem;
+      opacity: 0.8;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .back-button {
+        position: relative;
+        margin-bottom: 1rem;
+        align-self: flex-start;
+      }
+      
+      .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .option-details {
+        grid-template-columns: 1fr;
+      }
+      
+
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="home.html" class="back-button">Back</a>
+      <h1 class="logo">DX Technologies</h1>
+      <p class="subtitle">Stock Options Trading Platform</p>
+    </header>
+    
+    <div class="stats-section">
+      <h2 class="stats-title">Market Overview</h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">$2.4T</div>
+          <div class="stat-label">Total Portfolio Value</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">+12.4%</div>
+          <div class="stat-label">Today's Gain</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">8</div>
+          <div class="stat-label">Active Positions</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">$156M</div>
+          <div class="stat-label">Available Capital</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="options-grid">
+      <!-- Tesla -->
+      <div class="option-card">
+        <h3 class="company-name">Tesla</h3>
+        <p class="company-description">Electric vehicles, clean energy, and sustainable technology</p>
+        <div class="price-info">
+          <div class="current-price">$248.50</div>
+          <div class="price-change price-up">+5.2%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$250</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Jan 2026</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- SpaceX -->
+      <div class="option-card">
+        <h3 class="company-name">SpaceX</h3>
+        <p class="company-description">Space exploration and satellite technology</p>
+        <div class="price-info">
+          <div class="current-price">$97.80</div>
+          <div class="price-change price-up">+3.8%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$100</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Oct 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- xAI -->
+      <div class="option-card">
+        <h3 class="company-name">xAI</h3>
+        <p class="company-description">Artificial intelligence and machine learning</p>
+        <div class="price-info">
+          <div class="current-price">$45.20</div>
+          <div class="price-change price-down">-2.1%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$45</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Sept 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- Boring Company -->
+      <div class="option-card">
+        <h3 class="company-name">Boring Company</h3>
+        <p class="company-description">Infrastructure and tunnel construction</p>
+        <div class="price-info">
+          <div class="current-price">$12.75</div>
+          <div class="price-change price-up">+1.9%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$13</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Dec 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- X Corp -->
+      <div class="option-card">
+        <h3 class="company-name">X Corp</h3>
+        <p class="company-description">Social media and digital communications</p>
+        <div class="price-info">
+          <div class="current-price">$18.90</div>
+          <div class="price-change price-down">-0.8%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$19</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Nov 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- Neuralink -->
+      <div class="option-card">
+        <h3 class="company-name">Neuralink</h3>
+        <p class="company-description">Brain-computer interface technology</p>
+        <div class="price-info">
+          <div class="current-price">$67.30</div>
+          <div class="price-change price-up">+7.5%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$65</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Oct 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- OpenAI -->
+      <div class="option-card">
+        <h3 class="company-name">OpenAI</h3>
+        <p class="company-description">Advanced AI research and development</p>
+        <div class="price-info">
+          <div class="current-price">$89.45</div>
+          <div class="price-change price-up">+4.2%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$90</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Sept 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- Zip2 -->
+      <div class="option-card">
+        <h3 class="company-name">Zip2</h3>
+        <p class="company-description">Business directory and mapping services</p>
+        <div class="price-info">
+          <div class="current-price">$34.20</div>
+          <div class="price-change price-down">-1.3%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$35</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Feb 2026</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+      
+      <!-- X.com -->
+      <div class="option-card">
+        <h3 class="company-name">X.com</h3>
+        <p class="company-description">Financial services and digital payments</p>
+        <div class="price-info">
+          <div class="current-price">$156.80</div>
+          <div class="price-change price-up">+2.7%</div>
+        </div>
+        <div class="option-details">
+          <div class="detail-item">
+            <div class="detail-label">Strike Price</div>
+            <div class="detail-value">$160</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Expiry</div>
+            <div class="detail-value">Nov 2025</div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn btn-buy">Buy</button>
+        </div>
+      </div>
+    </div>
+    
+    <footer class="footer">
+      <p>© 2024 DX Technologies. All rights reserved.</p>
+      <p class="signature">Marvelous</p>
+    </footer>
+  </div>
+  
+  <script>
+    // Default stock data (fallback if API fails)
+    const defaultStockData = {
+      'Tesla': { price: 248.50, change: 5.2, direction: 'up' },
+      'SpaceX': { price: 97.80, change: 3.8, direction: 'up' },
+      'xAI': { price: 45.20, change: 2.1, direction: 'down' },
+      'Boring Company': { price: 12.75, change: 1.9, direction: 'up' },
+      'X Corp': { price: 18.90, change: 0.8, direction: 'down' },
+      'Neuralink': { price: 67.30, change: 7.5, direction: 'up' },
+      'OpenAI': { price: 89.45, change: 4.2, direction: 'up' },
+      'Zip2': { price: 34.20, change: 1.3, direction: 'down' },
+      'X.com': { price: 156.80, change: 2.7, direction: 'up' }
+    };
+
+    // Function to update stock display
+    function updateStockDisplay(company, data) {
+      // Find the card by looking for the company name
+      const companyElements = document.querySelectorAll('.company-name');
+      let targetCard = null;
+      
+      for (let element of companyElements) {
+        if (element.textContent.trim() === company) {
+          targetCard = element.closest('.option-card');
+          break;
+        }
+      }
+      
+      if (!targetCard) return;
+
+      const priceElement = targetCard.querySelector('.current-price');
+      const changeElement = targetCard.querySelector('.price-change');
+      
+      if (priceElement) {
+        // Display the stored price (which is already the calculated new price)
+        priceElement.textContent = `$${data.price.toFixed(2)}`;
+      }
+      
+      if (changeElement) {
+        const sign = data.direction === 'up' ? '+' : '-';
+        changeElement.textContent = `${sign}${data.change}%`;
+        changeElement.className = `price-change ${data.direction === 'up' ? 'price-up' : 'price-down'}`;
+      }
+    }
+
+    // Function to load stock data from API
+    async function loadStockData() {
+      try {
+        const response = await fetch('/api/stocks');
+        const result = await response.json();
+        
+        if (response.ok && result.ok && result.stocks) {
+          // Update stocks with API data
+          result.stocks.forEach(stock => {
+            updateStockDisplay(stock.company, {
+              price: stock.current_price,
+              change: stock.percentage_change,
+              direction: stock.direction
+            });
+          });
+        } else {
+          // Fallback to default data
+          console.log('Using default stock data');
+          Object.entries(defaultStockData).forEach(([company, data]) => {
+            updateStockDisplay(company, data);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load stock data:', error);
+        // Fallback to default data
+        Object.entries(defaultStockData).forEach(([company, data]) => {
+          updateStockDisplay(company, data);
+        });
+      }
+    }
+
+    // Load stock data on page load
+    document.addEventListener('DOMContentLoaded', loadStockData);
+
+    // Add interactive functionality
+    document.querySelectorAll('.btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const company = this.closest('.option-card').querySelector('.company-name').textContent;
+        // Store the selected company in localStorage for the deposit page
+        localStorage.setItem('selectedStock', company);
+        // Redirect to deposit page
+        window.location.href = 'deposit.html';
+      });
+    });
+
+    // Refresh stock data every 30 seconds
+    setInterval(loadStockData, 30000);
+  </script>
+</body>
+</html>

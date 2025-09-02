@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Up</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    body{margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Arial; background:#0b0f15; color:#e6e9ef; display:grid; place-items:center; min-height:100vh}
+    .card{width:420px; max-width:92vw; background:#111827; border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:20px}
+    .title{font-weight:800; margin-bottom:10px}
+    .input{width:100%; box-sizing:border-box; padding:12px 14px; border-radius:8px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); color:#e6e9ef; margin:8px 0}
+    .btn{width:100%; padding:12px 14px; border-radius:8px; border:0; background:#2f67ff; color:white; font-weight:700; margin-top:10px; cursor:pointer}
+    .btn.secondary{background:transparent; border:1px solid rgba(255,255,255,.18);}
+    .muted{color:#93a0b3; margin-top:8px}
+    a{color:#9bbcff; text-decoration:none}
+    .error{color:#ef4444; margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">Create account</div>
+    <input id="name" class="input" placeholder="Wallet name" />
+    <input id="email" class="input" type="email" placeholder="Email" />
+    <input id="password" class="input" type="password" placeholder="Password (min 6 characters)" />
+    <button id="signupBtn" class="btn" type="button">Sign Up</button>
+    <button id="gotoLogin" class="btn secondary" type="button">Sign In</button>
+    <div id="msg" class="muted"></div>
+    <div class="muted">Already have an account? <a href="login.html">Log in</a></div>
+  </div>
+  <script>
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+      const name = (document.getElementById('name').value||'').trim();
+      const email = (document.getElementById('email').value||'').trim();
+      const password = (document.getElementById('password').value||'').trim();
+      const msg = document.getElementById('msg');
+      
+      // Clear previous messages
+      msg.textContent = '';
+      msg.className = 'muted';
+      
+      if (!name || !email || password.length < 6) { 
+        msg.textContent = 'Enter name, email, and password (min 6 characters).'; 
+        msg.className = 'error';
+        return; 
+      }
+      
+      try {
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, name, password })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          msg.textContent = result.error || 'Signup failed. Please try again.';
+          msg.className = 'error';
+          return;
+        }
+        
+        // Save user data to localStorage
+        const profile = result.profile;
+        localStorage.setItem('we_uid', profile.uid);
+        localStorage.setItem('we_wallet_name', profile.name || '');
+        localStorage.setItem('we_wallet_email', profile.email || '');
+        
+        // Show success message
+        msg.textContent = 'Account created successfully! Redirecting to login...';
+        msg.className = 'muted';
+        
+        // Redirect to login page after a short delay
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+        
+      } catch (error) {
+        msg.textContent = 'Network error. Please try again.';
+        msg.className = 'error';
+      }
+    });
+    
+    document.getElementById('gotoLogin').addEventListener('click', () => {
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>
+
+
