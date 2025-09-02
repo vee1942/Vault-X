@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f15;
+      --panel: #0e1420;
+      --panel-2: #0b101b;
+      --card: #111827;
+      --border: rgba(255,255,255,0.08);
+      --line: rgba(255,255,255,0.08);
+      --text: #e6e9ef;
+      --muted: #93a0b3;
+      --primary: #2f67ff;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      color: var(--text);
+      background: linear-gradient(180deg, #0f1420, #070b12);
+    }
+
+    .topbar {
+      height: 56px; display: flex; align-items: center; gap: 10px; padding: 0 12px; color: var(--text);
+      border-bottom: 1px solid var(--line);
+      background: rgba(9,12,20,.8); backdrop-filter: blur(6px);
+      position: sticky; top: 0; z-index: 5;
+    }
+    .back { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--line); display: grid; place-items: center; cursor: pointer; color: #9aa4b2; background: transparent; }
+
+    .frame { min-height: calc(100% - 56px); padding: 24px 16px 56px; display: flex; justify-content: center; }
+    .container { width: 980px; max-width: 96vw; display: grid; gap: 18px; }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .panel h3 { margin: 0 0 10px; font-size: 18px; }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; background: rgba(255,255,255,0.02); }
+    .row .left { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+    .badge { padding: 4px 8px; font-size: 12px; color: #0b0f15; border-radius: 999px; background: #e5e7eb; }
+    .copy { width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 8px; display: grid; place-items: center; color: #9aa4b2; cursor: pointer; }
+
+    .section { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+
+    .perm {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.02);
+    }
+
+    .tag { padding: 4px 8px; border-radius: 999px; background: #1f2937; font-size: 12px; }
+    .tag.danger { background: rgba(239,68,68,.2); color: #fecaca; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 10px; border: 1px solid transparent; cursor: pointer; color: white; font-weight: 700; text-decoration: none; }
+    .btn.primary { background: #2f67ff; }
+    .btn.success { background: #22c55e; }
+    .btn.danger { background: #ef4444; }
+
+    .wallet {
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: rgba(255,255,255,0.02);
+    }
+    .pill { padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.06); color: #cbd5e1; }
+    .cta-row { display: flex; gap: 12px; margin-top: 10px; }
+    .btn.deposit { background: #22c55e; }
+    .btn.transfer { background: #ef4444; }
+
+    .muted { color: var(--muted); }
+    
+    .logout-btn {
+      background: #ef4444;
+      border: none;
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <button class="back" onclick="history.back()" aria-label="Back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div style="font-weight:800; margin-left:4px;">My Profile</div>
+  </div>
+
+  <div class="frame">
+    <div class="container">
+
+      <div class="panel">
+        <div style="font-weight:800; margin-bottom:8px;">Account</div>
+        <div class="row">
+          <div class="left"><span class="badge">Uid</span><span id="accUid">—</span></div>
+          <div class="copy" title="Copy" onclick="copyText(document.getElementById('accUid').dataset.full || '')">⧉</div>
+        </div>
+        <div class="row">
+          <div class="left"><span class="badge">Wallet Name</span><span id="accName">—</span></div>
+          <div class="copy" title="Copy" onclick="copyText(document.getElementById('accName').textContent)">⧉</div>
+        </div>
+        <div class="row">
+          <div class="left"><span class="badge">Email</span><span id="accEmail">—</span></div>
+          <div class="copy" title="Copy" onclick="copyText(document.getElementById('accEmail').textContent)">⧉</div>
+        </div>
+        <div class="row">
+          <div class="left"><span class="badge">Contract</span><span id="accContract">—</span></div>
+          <div class="copy" title="Copy" onclick="copyText(document.getElementById('accContract').dataset.full || '')">⧉</div>
+        </div>
+      </div>
+
+      <div class="panel section">
+        <h3>Permissions</h3>
+        <div class="perm">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="font-weight:700;">Notification Permission:</div>
+            <span class="tag danger">Denied</span>
+          </div>
+          <div style="display:grid; gap:10px; margin-top:10px;">
+            <button class="btn primary" type="button" onclick="alert('Requesting permission…')">Request Notification Permission</button>
+            <button class="btn success" type="button" onclick="playTone()">Play Notification Sound</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel section">
+        <h3>My Wallet</h3>
+        <div><span style="font-weight:700;">GasFee Balance:</span> <span id="gasBalance" class="pill">$0.00 USD</span></div>
+        <div class="cta-row">
+          <a class="btn deposit" href="deposit-gas fee.html">💳 Deposit</a>
+          <a class="btn transfer" href="send.html">✈ Transfer</a>
+        </div>
+      </div>
+
+      <div style="text-align:right; margin-top:20px;">
+        <button class="logout-btn" id="logoutBtn" type="button">Logout</button>
+      </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function copyText(text){
+      navigator.clipboard?.writeText(text);
+    }
+    function playTone(){
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(880, ctx.currentTime);
+      o.connect(g); g.connect(ctx.destination); g.gain.setValueAtTime(0.001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.01);
+      o.start(); g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3); o.stop(ctx.currentTime + 0.32);
+    }
+
+    // Generate contract address from UID
+    function generateContractAddress(uid) {
+      if (!uid || uid === '—') return '—';
+      
+      // Create a hash from the UID to generate a consistent address
+      let hash = 0;
+      for (let i = 0; i < uid.length; i++) {
+        const char = uid.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32-bit integer
+      }
+      
+      // Generate a 40-character hex string (20 bytes)
+      const hexChars = '0123456789abcdef';
+      let address = '0x';
+      
+      // Use the hash to seed the address generation
+      for (let i = 0; i < 40; i++) {
+        const index = Math.abs(hash + i * 7) % hexChars.length;
+        address += hexChars[index];
+      }
+      
+      return address;
+    }
+
+    // Populate account info from localStorage
+    (function fillAccount(){
+      const short = (v, n=12) => v && v.length > n ? v.slice(0, n) + '…' : (v || '—');
+      const uid = localStorage.getItem('we_uid') || '—';
+      const name = localStorage.getItem('we_wallet_name') || '—';
+      const email = localStorage.getItem('we_wallet_email') || '—';
+      
+      // Generate contract address from UID instead of using password
+      const contract = generateContractAddress(uid);
+
+      const uidEl = document.getElementById('accUid');
+      uidEl.textContent = short(uid, 14);
+      uidEl.dataset.full = uid;
+
+      document.getElementById('accName').textContent = name;
+      document.getElementById('accEmail').textContent = email;
+
+      const cEl = document.getElementById('accContract');
+      cEl.textContent = short(contract, 14);
+      cEl.dataset.full = contract;
+    })();
+
+    // Load current backend balance
+    (async function loadBalance(){
+      try {
+        const uid = localStorage.getItem('we_uid');
+        if (!uid) return;
+        const r = await fetch(`/api/profile/${encodeURIComponent(uid)}`);
+        if (!r.ok) return;
+        const j = await r.json();
+        const usd = Number(j.balance_usd || 0);
+        const el = document.getElementById('gasBalance');
+        if (el) el.textContent = `$${usd.toLocaleString(undefined,{maximumFractionDigits:2})} USD`;
+      } catch {}
+    })();
+
+    // Admin functions moved to admin.html; use the Admin button above.
+    
+    // Logout functionality
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      try {
+        // Clear session data
+        localStorage.removeItem('we_uid');
+        localStorage.removeItem('we_wallet_name');
+        localStorage.removeItem('we_wallet_email');
+        // Keep login credentials for convenience
+        // localStorage.removeItem('we_login_email');
+        // localStorage.removeItem('we_login_password');
+      } catch (error) {
+        console.error('Error clearing session:', error);
+      }
+      // Redirect to login page
+      window.location.href = 'login.html';
+    });
+  </script>
+</body>
+</html>

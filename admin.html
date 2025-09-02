@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin • Manual Deposit</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f15;
+      --panel: #0e1420;
+      --panel-2: #0b101b;
+      --border: rgba(255,255,255,0.08);
+      --text: #e6e9ef;
+      --muted: #93a0b3;
+      --success: #22c55e;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial; color: var(--text); background: linear-gradient(180deg, #0f1420, #070b12); }
+    .topbar { height:56px; display:flex; align-items:center; gap:10px; padding:0 12px; border-bottom:1px solid var(--border); background: rgba(9,12,20,.8); backdrop-filter: blur(6px); position: sticky; top:0; z-index: 5; }
+    .back { width:32px; height:32px; border-radius:8px; border:1px solid var(--border); display:grid; place-items:center; color:#9aa4b2; background:transparent; cursor:pointer; }
+    .frame { min-height: calc(100% - 56px); padding: 24px 16px 56px; display:flex; justify-content:center; }
+    .container { width: 780px; max-width: 96vw; display: grid; gap: 18px; }
+    .panel { border:1px solid var(--border); background: linear-gradient(180deg, var(--panel), var(--panel-2)); border-radius: 12px; padding: 16px; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 12px; border:1px solid var(--border); border-radius:10px; background: rgba(255,255,255,0.02); }
+    .left { display:flex; align-items:center; gap:10px; }
+    .badge { padding: 4px 8px; font-size: 12px; color: #0b0f15; border-radius: 999px; background: #e5e7eb; }
+    .input { width: 380px; max-width: 60vw; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.03); color: var(--text); outline: none; }
+    .cta-row { display:flex; gap:12px; margin-top: 10px; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:10px; border:1px solid transparent; cursor:pointer; color:white; font-weight:700; text-decoration:none; }
+    .btn.success { background: var(--success); }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a href="home.html" class="back" aria-label="Back">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div style="font-weight:800;">Admin — Manual Deposit</div>
+  </div>
+
+  <div class="frame">
+    <div class="container">
+      <div class="panel">
+        <div style="font-weight:800; margin-bottom:8px;">Apply Deposit</div>
+        <div class="row"><div class="left"><span class="badge">Uid</span><input id="admUid" class="input" placeholder="uid_..." /></div></div>
+        <div class="row"><div class="left"><span class="badge">Target</span>
+          <select id="admTarget" class="input" style="width:200px;">
+            <option value="gas">Gas Fee Balance</option>
+            <option value="home">Home Balance</option>
+          </select>
+        </div></div>
+        <div class="row"><div class="left"><span class="badge">Amount (USD)</span><input id="admAmt" class="input" type="number" step="0.01" placeholder="100" /></div></div>
+        <div class="row"><div class="left"><span class="badge">Admin Key</span><input id="admKey" class="input" type="password" placeholder="admin key" /></div></div>
+        <div class="row"><div class="left"><span class="badge">API Base</span><input id="admBase" class="input" placeholder="https://your-domain.com" /></div></div>
+        <div class="cta-row"><button id="admSubmit" class="btn success" type="button">Apply Deposit</button></div>
+        <div id="admMsg" class="muted" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="panel">
+        <div style="font-weight:800; margin-bottom:8px;">Tips</div>
+        <div class="muted">Ensure the UID exists. You can register a UID by authenticating via <a href="login.html" style="color:#93a0b3;">login.html</a>.</div>
+      </div>
+
+      <div class="panel">
+        <div style="font-weight:800; margin-bottom:8px;">Stock Options - Percentage Management</div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Company</span>
+            <select id="stockCompany" class="input" style="width:200px;">
+              <option value="Tesla">Tesla</option>
+              <option value="SpaceX">SpaceX</option>
+              <option value="xAI">xAI</option>
+              <option value="Boring Company">Boring Company</option>
+              <option value="X Corp">X Corp</option>
+              <option value="Neuralink">Neuralink</option>
+              <option value="OpenAI">OpenAI</option>
+              <option value="Zip2">Zip2</option>
+              <option value="X.com">X.com</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Current Price</span>
+            <input id="stockCurrentPrice" class="input" type="number" step="0.01" placeholder="248.50" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Percentage Change</span>
+            <input id="stockPercentage" class="input" type="number" step="0.1" placeholder="5.2" />
+            <select id="stockDirection" class="input" style="width:100px; margin-left:8px;">
+              <option value="up">Up (+)</option>
+              <option value="down">Down (-)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">New Price (Calculated)</span>
+            <input id="stockNewPrice" class="input" readonly placeholder="Calculated automatically" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Admin Key</span>
+            <input id="stockAdminKey" class="input" type="password" placeholder="admin key" />
+          </div>
+        </div>
+        <div class="cta-row">
+          <button id="stockSubmit" class="btn success" type="button">Update Stock Percentage</button>
+        </div>
+        <div id="stockMsg" class="muted" style="margin-top:8px;"></div>
+      </div>
+
+      <div class="panel">
+        <div style="font-weight:800; margin-bottom:8px;">Percentage Bubble Management</div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Uid (optional)</span>
+            <input id="percentageUid" class="input" placeholder="uid_... (leave empty for global)" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Percentage Value</span>
+            <input id="percentageValue" class="input" type="number" step="0.01" placeholder="5.25" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Direction</span>
+            <select id="percentageDirection" class="input" style="width:200px;">
+              <option value="up">Up (+)</option>
+              <option value="down">Down (-)</option>
+              <option value="neutral">Neutral (0)</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="left">
+            <span class="badge">Admin Key</span>
+            <input id="percentageAdminKey" class="input" type="password" placeholder="admin key" />
+          </div>
+        </div>
+        <div class="cta-row">
+          <button id="percentageSubmit" class="btn success" type="button">Update Percentage Bubble</button>
+        </div>
+        <div id="percentageMsg" class="muted" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function initBase(){
+      const baseInput = document.getElementById('admBase');
+      const saved = localStorage.getItem('we_api_base') || '';
+      if (saved) baseInput.value = saved;
+      baseInput.addEventListener('change', () => {
+        const v = (baseInput.value || '').trim();
+        localStorage.setItem('we_api_base', v);
+      });
+    })();
+
+    function api(url){
+      const base = (localStorage.getItem('we_api_base') || '').trim();
+      if (!base) return url; // same origin
+      return base.replace(/\/$/, '') + url;
+    }
+
+    document.getElementById('admSubmit').addEventListener('click', async () => {
+      const uid = (document.getElementById('admUid').value || '').trim();
+      const amt = Number((document.getElementById('admAmt').value || '').trim());
+      const key = (document.getElementById('admKey').value || '').trim();
+      const target = (document.getElementById('admTarget').value || 'gas');
+      const msg = document.getElementById('admMsg');
+      if (!uid || !Number.isFinite(amt) || amt <= 0 || !key) { msg.textContent = 'Enter uid, positive amount, and admin key.'; return; }
+      msg.textContent = 'Submitting…';
+      try {
+        const endpoint = target === 'home' ? '/api/deposits/manual/home' : '/api/deposits/manual';
+        const r = await fetch(api(endpoint), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-admin-key': key },
+          body: JSON.stringify({ uid, amountUsd: amt, note: 'admin' })
+        });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) { msg.textContent = 'Failed: ' + (j.error || r.statusText); return; }
+        const gas = Number(j.profile?.balance_usd || 0);
+        const home = Number(j.profile?.wallet_balance_usd || 0);
+        msg.textContent = `Success. Gas: $${gas.toLocaleString(undefined,{maximumFractionDigits:2})} • Home: $${home.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+      } catch (e) { msg.textContent = 'Network error.'; }
+    });
+
+    // Stock percentage management functionality
+    const stockCompany = document.getElementById('stockCompany');
+    const stockCurrentPrice = document.getElementById('stockCurrentPrice');
+    const stockPercentage = document.getElementById('stockPercentage');
+    const stockDirection = document.getElementById('stockDirection');
+    const stockNewPrice = document.getElementById('stockNewPrice');
+    const stockAdminKey = document.getElementById('stockAdminKey');
+    const stockSubmit = document.getElementById('stockSubmit');
+    const stockMsg = document.getElementById('stockMsg');
+
+    // Default stock prices
+    const defaultPrices = {
+      'Tesla': 248.50,
+      'SpaceX': 97.80,
+      'xAI': 45.20,
+      'Boring Company': 12.75,
+      'X Corp': 18.90,
+      'Neuralink': 67.30,
+      'OpenAI': 89.45,
+      'Zip2': 34.20,
+      'X.com': 156.80
+    };
+
+    // Load current stock data when company changes
+    stockCompany.addEventListener('change', () => {
+      const company = stockCompany.value;
+      stockCurrentPrice.value = defaultPrices[company] || '';
+      calculateNewPrice();
+    });
+
+    // Calculate new price when percentage or direction changes
+    function calculateNewPrice() {
+      const currentPrice = parseFloat(stockCurrentPrice.value);
+      const percentage = parseFloat(stockPercentage.value);
+      const direction = stockDirection.value;
+      
+      if (currentPrice && percentage) {
+        const multiplier = direction === 'up' ? (1 + percentage / 100) : (1 - percentage / 100);
+        const newPrice = currentPrice * multiplier;
+        stockNewPrice.value = newPrice.toFixed(2);
+      } else {
+        stockNewPrice.value = '';
+      }
+    }
+
+    stockCurrentPrice.addEventListener('input', calculateNewPrice);
+    stockPercentage.addEventListener('input', calculateNewPrice);
+    stockDirection.addEventListener('change', calculateNewPrice);
+
+    // Submit stock percentage update
+    stockSubmit.addEventListener('click', async () => {
+      const company = stockCompany.value;
+      const currentPrice = parseFloat(stockCurrentPrice.value);
+      const percentage = parseFloat(stockPercentage.value);
+      const direction = stockDirection.value;
+      const key = stockAdminKey.value.trim();
+      
+      if (!company || !currentPrice || !percentage || !key) {
+        stockMsg.textContent = 'Please fill in all fields.';
+        return;
+      }
+      
+      stockMsg.textContent = 'Updating stock percentage...';
+      
+      try {
+        const response = await fetch(api('/api/stocks/update-percentage'), {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json', 
+            'x-admin-key': key 
+          },
+          body: JSON.stringify({ 
+            company, 
+            currentPrice, 
+            percentage, 
+            direction 
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.ok) {
+          const newPrice = result.newPrice || 'calculated';
+          stockMsg.textContent = `Successfully updated ${company} stock percentage to ${direction === 'up' ? '+' : '-'}${percentage}%. New price: $${newPrice}`;
+          // Update the default price for future reference
+          defaultPrices[company] = currentPrice;
+        } else {
+          stockMsg.textContent = 'Failed: ' + (result.error || 'Unknown error');
+        }
+      } catch (e) {
+        stockMsg.textContent = 'Network error.';
+      }
+    });
+
+    // Initialize with first company
+    stockCompany.dispatchEvent(new Event('change'));
+
+    // Percentage Bubble Management functionality
+    const percentageUid = document.getElementById('percentageUid');
+    const percentageValue = document.getElementById('percentageValue');
+    const percentageDirection = document.getElementById('percentageDirection');
+    const percentageAdminKey = document.getElementById('percentageAdminKey');
+    const percentageSubmit = document.getElementById('percentageSubmit');
+    const percentageMsg = document.getElementById('percentageMsg');
+
+    // Submit percentage bubble update
+    percentageSubmit.addEventListener('click', async () => {
+      const uid = (percentageUid.value || '').trim();
+      const value = parseFloat(percentageValue.value);
+      const direction = percentageDirection.value;
+      const key = percentageAdminKey.value.trim();
+      
+      if (!key) {
+        percentageMsg.textContent = 'Please enter admin key.';
+        return;
+      }
+      
+      if (direction !== 'neutral' && (!value || value <= 0)) {
+        percentageMsg.textContent = 'Please enter a valid percentage value.';
+        return;
+      }
+      
+      percentageMsg.textContent = 'Updating percentage bubble...';
+      
+      try {
+        const response = await fetch(api('/api/percentage/update'), {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json', 
+            'x-admin-key': key 
+          },
+          body: JSON.stringify({ 
+            uid: uid || undefined,
+            value: direction === 'neutral' ? 0 : value, 
+            direction 
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.ok) {
+          const scope = result.scope === 'user' ? `for ${uid}` : 'globally';
+          const displayValue = direction === 'neutral' ? '0.00' : (direction === 'up' ? `+${value}` : `-${value}`);
+          percentageMsg.textContent = `Successfully updated ${scope} to ${displayValue}%`;
+          // Clear the form
+          percentageValue.value = '';
+          percentageDirection.value = 'up';
+          percentageUid.value = '';
+        } else {
+          percentageMsg.textContent = 'Failed: ' + (result.error || 'Unknown error');
+        }
+      } catch (e) {
+        percentageMsg.textContent = 'Network error.';
+      }
+    });
+  </script>
+</body>
+</html>
+
+

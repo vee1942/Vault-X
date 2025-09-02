@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vault-X — Wallet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0f15;
+      --panel: #0e1420;
+      --panel-2: #0b101b;
+      --card: #111827;
+      --border: rgba(255,255,255,0.08);
+      --text: #e6e9ef;
+      --muted: #93a0b3;
+      --success: #25c05a;
+      --danger: #ff5b5b;
+      --primary: #6d5efc;
+      --primary-2: #5a7bff;
+      --shadow: rgba(0,0,0,0.5);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial;
+      color: var(--text);
+      background: radial-gradient(120% 120% at 0% 0%, rgba(109,94,252,0.12) 0%, rgba(109,94,252,0) 40%),
+                  linear-gradient(180deg, #0a0f17, #06090f 70%);
+    }
+
+    .frame {
+      min-height: 100%;
+      padding: 28px 18px 56px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 980px;
+      max-width: 96vw;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      color: var(--muted);
+    }
+
+    .app-name { font-weight: 600; }
+
+    .card {
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--panel), var(--panel-2));
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 24px 56px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    .wallet-head { display: flex; align-items: center; justify-content: space-between; }
+
+    .wallet-id { display: flex; align-items: center; gap: 12px; }
+
+    .avatar {
+      width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+      background: linear-gradient(180deg, #6d5efc, #4a7fff);
+      font-weight: 800;
+    }
+
+    .status { color: #56e39f; font-size: 12px; }
+
+    .profile { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); display: grid; place-items: center; color: var(--muted); }
+
+    .balance {
+      margin: 18px 0 8px;
+      font-size: clamp(28px, 6vw, 64px);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .percentage-bubble {
+      background: linear-gradient(90deg, var(--success), #33d17a);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: 0 4px 12px rgba(35, 197, 94, 0.3);
+      animation: pulse 2s infinite;
+    }
+
+    .percentage-bubble.negative {
+      background: linear-gradient(90deg, var(--danger), #ff8a7a);
+      box-shadow: 0 4px 12px rgba(255, 91, 91, 0.3);
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .sub-balance { color: var(--muted); margin-bottom: 16px; }
+
+    .actions { display: flex; gap: 18px; margin-top: 18px; }
+
+    .btn {
+      appearance: none;
+      border: 1px solid transparent;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.02s ease, filter 0.15s ease, background 0.15s ease;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 10px;
+      color: white;
+    }
+
+    .btn:active { transform: translateY(1px); }
+
+    .btn-buy-stock { background: linear-gradient(90deg, #23c55e, #33d17a); }
+    .btn-buy-stock:hover { filter: brightness(1.05); }
+
+    .btn-withdraw { background: linear-gradient(90deg, #ff6a6a, #ff8a7a); }
+    .btn-withdraw:hover { filter: brightness(1.05); }
+
+    .section { margin-top: 22px; }
+    .section-title { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+    .tabbar {
+      display: flex; gap: 10px; margin-top: 14px;
+      background: rgba(255,255,255,0.03);
+      padding: 6px; border-radius: 12px; border: 1px solid var(--border);
+      width: fit-content;
+    }
+
+    .tab { padding: 8px 14px; border-radius: 10px; color: var(--muted); font-weight: 600; cursor: pointer; }
+    .tab.active { background: linear-gradient(90deg, var(--primary), var(--primary-2)); color: white; }
+
+    .tx-list { margin-top: 16px; display: grid; gap: 12px; }
+    .tx { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; }
+    .tx .left { display: flex; align-items: center; gap: 12px; }
+    .pill { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #132816; color: #4fe38a; }
+    .tx .meta { color: var(--muted); font-size: 12px; }
+    .amount { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="container">
+      <div class="header">
+        <span class="app-name">Vault-X</span>
+      </div>
+
+      <div class="card">
+        <div class="wallet-head">
+          <div class="wallet-id">
+            <div class="avatar" id="avatarInitial">M</div>
+            <div>
+              <div style="font-weight:700;" id="walletDisplayName">Wallet</div>
+              <div class="status">• Active</div>
+            </div>
+          </div>
+          <a class="profile" href="database.html" aria-label="Profile">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+        </div>
+
+        <div class="balance">
+          <div id="fiatBalance">$0.00 <span style="font-size:14px;font-weight:700;opacity:.8;">USD</span></div>
+          <div class="percentage-bubble" id="percentageBubble">
+            <span id="percentageIcon">↗</span>
+            <span id="percentageValue">+0.00%</span>
+          </div>
+        </div>
+        <div class="sub-balance" id="btcBalance">0.00 BTC</div>
+
+        <div class="actions">
+          <a id="btnBuyStock" class="btn btn-buy-stock" href="stock-option.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Buy Stock
+          </a>
+          <a class="btn btn-withdraw" href="send.html">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14m0 0l-4-4m4 4l-4 4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Withdraw
+          </a>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="card">
+          <div class="section-title">Transactions <span style="color:#56e39f">•</span></div>
+          <div class="tabbar">
+            <div id="tabPublic" class="tab">Public Feed</div>
+            <div id="tabPersonal" class="tab active">Personal</div>
+          </div>
+          <div id="txList" class="tx-list"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+<script>
+  (async function loadBalance(){
+    try {
+      const uid = localStorage.getItem('we_uid');
+      
+      // Function to update percentage bubble
+      function updatePercentageBubble(percentage) {
+        const bubble = document.getElementById('percentageBubble');
+        const icon = document.getElementById('percentageIcon');
+        const value = document.getElementById('percentageValue');
+        
+        if (percentage > 0) {
+          bubble.classList.remove('negative');
+          icon.textContent = '↗';
+          value.textContent = `+${percentage.toFixed(2)}%`;
+        } else if (percentage < 0) {
+          bubble.classList.add('negative');
+          icon.textContent = '↘';
+          value.textContent = `${percentage.toFixed(2)}%`;
+        } else {
+          bubble.classList.remove('negative');
+          icon.textContent = '→';
+          value.textContent = '0.00%';
+        }
+      }
+      
+      // Try DB wallet balance first
+      if (uid) {
+        try {
+          const pr = await fetch(`/api/profile/${encodeURIComponent(uid)}`);
+          if (pr.ok) {
+            const pj = await pr.json();
+            const usd = Number(pj.wallet_balance_usd || 0);
+            if (usd > 0) {
+              document.getElementById('fiatBalance').innerHTML = `$${usd.toLocaleString(undefined,{maximumFractionDigits:2})} <span style="font-size:14px;font-weight:700;opacity:.8;">USD</span>`;
+              
+              // Calculate percentage change (simulate based on time or previous balance)
+              const previousBalance = localStorage.getItem('previous_balance') || usd;
+              const percentageChange = ((usd - previousBalance) / previousBalance) * 100;
+              updatePercentageBubble(percentageChange);
+              
+              // Store current balance for next calculation
+              localStorage.setItem('previous_balance', usd);
+              
+              // Show BTC equivalent of the USD balance
+              try {
+                const btcPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+                const btcPriceJson = await btcPriceRes.json();
+                const btcPrice = btcPriceJson?.bitcoin?.usd || 0;
+                if (btcPrice > 0) {
+                  const btcEq = usd / btcPrice;
+                  document.getElementById('btcBalance').textContent = `${btcEq.toLocaleString(undefined,{maximumFractionDigits:8})} BTC`;
+                } else {
+                  document.getElementById('btcBalance').textContent = `${usd.toLocaleString(undefined,{maximumFractionDigits:4})} BTC`;
+                }
+              } catch (error) {
+                // Fallback to 1:1 ratio if API fails
+                document.getElementById('btcBalance').textContent = `${usd.toLocaleString(undefined,{maximumFractionDigits:4})} BTC`;
+              }
+              window.__bnbBalanceReady = true; // consider satisfied
+              return;
+            }
+          }
+        } catch {}
+      }
+      // fallback to on-chain balance
+      const addr = localStorage.getItem('we_bsc_address');
+      if (!addr) return;
+      const key = localStorage.getItem('we_bscscan_key') || '';
+      const bres = await fetch(`https://api.bscscan.com/api?module=account&action=balance&address=${addr}&tag=latest${key?`&apikey=${key}`:''}`);
+      const bj = await bres.json();
+      if (bj.status === '1') {
+        const wei = BigInt(bj.result || '0');
+        const bnb = Number(wei) / 1e18;
+        try {
+          const pr = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=binancecoin&vs_currencies=usd');
+          const pj = await pr.json();
+          const price = pj?.binancecoin?.usd || 0;
+          const usd = bnb * price;
+          document.getElementById('fiatBalance').innerHTML = `$${usd.toLocaleString(undefined,{maximumFractionDigits:2})} <span style="font-size:14px;font-weight:700;opacity:.8;">USD</span>`;
+          
+          // Calculate percentage change for BSC balance
+          const previousBalance = localStorage.getItem('previous_balance') || usd;
+          const percentageChange = ((usd - previousBalance) / previousBalance) * 100;
+          updatePercentageBubble(percentageChange);
+          
+          // Store current balance for next calculation
+          localStorage.setItem('previous_balance', usd);
+          
+          // Show BTC equivalent of the USD balance
+          try {
+            const btcPriceRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+            const btcPriceJson = await btcPriceRes.json();
+            const btcPrice = btcPriceJson?.bitcoin?.usd || 0;
+            if (btcPrice > 0) {
+              const btcEq = usd / btcPrice;
+              document.getElementById('btcBalance').textContent = `${btcEq.toLocaleString(undefined,{maximumFractionDigits:8})} BTC`;
+            } else {
+              document.getElementById('btcBalance').textContent = `${usd.toLocaleString(undefined,{maximumFractionDigits:4})} BTC`;
+            }
+          } catch (error) {
+            // Fallback to 1:1 ratio if API fails
+            document.getElementById('btcBalance').textContent = `${usd.toLocaleString(undefined,{maximumFractionDigits:4})} BTC`;
+          }
+          window.__bnbBalanceReady = true;
+        } catch {}
+      }
+    } catch {}
+  })();
+
+  (function loadWalletName(){
+    const name = localStorage.getItem('we_wallet_name') || 'Wallet';
+    const letter = name.trim().charAt(0).toUpperCase() || 'W';
+    document.getElementById('avatarInitial').textContent = letter;
+    document.getElementById('walletDisplayName').textContent = name;
+  })();
+
+  // Transactions section
+  (function transactions(){
+    const listEl = document.getElementById('txList');
+    const tabPublic = document.getElementById('tabPublic');
+    const tabPersonal = document.getElementById('tabPersonal');
+    let publicTimer = null;
+    function setActive(tab){
+      [tabPublic, tabPersonal].forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      // manage public feed timer
+      clearInterval(publicTimer);
+      if (tab === tabPublic) {
+        buildPublicFeed();
+        publicTimer = setInterval(buildPublicFeed, 5000);
+      }
+    }
+    function render(items){
+      listEl.innerHTML = '';
+      for (const it of items) {
+        const tx = document.createElement('div');
+        tx.className = 'tx';
+        tx.innerHTML = `<div class="left"><div class="pill">${it.type === 'in' ? '↓' : '↑'}</div><div><div style="font-weight:700;">${it.title}</div><div class="meta">${it.meta}</div></div></div><div class="amount">${it.amount}</div>`;
+        listEl.appendChild(tx);
+      }
+    }
+
+    function randomName(){
+      const first = ['Alex','Sam','Jordan','Taylor','Chris','Morgan','Riley','Casey','Jamie','Quinn','Avery','Sky'];
+      const last = ['Stone','River','Blake','Parker','Lane','Reed','Shaw','Wells','Hart','Frost','Ray','Dean'];
+      return `${first[Math.floor(Math.random()*first.length)]}_${last[Math.floor(Math.random()*last.length)]}${Math.floor(Math.random()*999)}`;
+    }
+    function randomAmount(){
+      const min = 25000, max = 60000;
+      const val = Math.random()*(max-min)+min;
+      return `$${val.toLocaleString(undefined,{maximumFractionDigits:2})}`;
+    }
+    function buildPublicFeed(){
+      const items = Array.from({length: 6}).map((_,i) => ({
+        type: Math.random() > 0.5 ? 'in' : 'out',
+        title: Math.random() > 0.5 ? 'Deposit' : 'Withdraw',
+        meta: `User: ${randomName()} • ${new Date().toLocaleString()}`,
+        amount: randomAmount()
+      }));
+      render(items);
+    }
+
+    async function loadPersonal(){
+      const addr = localStorage.getItem('we_bsc_address');
+      const uid = localStorage.getItem('we_uid');
+      if (!addr && !uid) { render([{type:'in', title:'No address', meta:'Authenticate to load personal feed', amount:''}]); return; }
+      const items = [];
+      // Include admin/manual deposits from our backend
+      if (uid) {
+        try {
+          const r = await fetch(`/api/deposits/${encodeURIComponent(uid)}`);
+          const j = await r.json();
+          if (r.ok && j?.deposits?.length) {
+            for (const d of j.deposits.slice(0, 8)) {
+              const amt = Number(d.amount_usd || 0);
+              let title;
+              if (d.note === 'gas_fee') {
+                title = 'Gas Fee';
+              } else {
+                title = amt < 0 ? 'Withdraw' : 'Deposit';
+              }
+              const type = amt < 0 ? 'out' : 'in';
+              items.push({ type, title, meta: new Date(Number(d.created_at)||Date.now()).toLocaleString(), amount: `$${amt.toLocaleString(undefined,{maximumFractionDigits:2})}` });
+            }
+          }
+        } catch {}
+      }
+      // Include recent on-chain token transfers
+      if (addr) {
+        try {
+          const key = localStorage.getItem('we_bscscan_key') || '';
+          const url = `https://api.bscscan.com/api?module=account&action=tokentx&address=${addr}&sort=desc${key?`&apikey=${key}`:''}`;
+          const r = await fetch(url); const j = await r.json();
+          const rows = (j.result || []).slice(0, 8).map(t => {
+            const amt = Number(t.value) / Math.pow(10, Number(t.tokenDecimal || 18));
+            const inout = String(t.to).toLowerCase() === addr.toLowerCase() ? 'in' : 'out';
+            return {
+              type: inout,
+              title: `${inout==='in'?'Deposit':'Withdraw'} • ${t.tokenSymbol || 'TOKEN'}`,
+              meta: `${new Date(Number(t.timeStamp)*1000).toLocaleString()} • ${t.hash.slice(0,10)}…`,
+              amount: `${amt.toLocaleString(undefined,{maximumFractionDigits:4})}`
+            };
+          });
+          items.push(...rows);
+        } catch {}
+      }
+      if (items.length === 0) {
+        // Check if user has zero balance to show appropriate message
+        const uid = localStorage.getItem('we_uid');
+        if (uid) {
+          try {
+            const pr = await fetch(`/api/profile/${encodeURIComponent(uid)}`);
+            if (pr.ok) {
+              const pj = await pr.json();
+              const usd = Number(pj.wallet_balance_usd || 0);
+              if (usd === 0) {
+                items.push({type:'in', title:'No recent personal transactions', meta:'Your personal feed will show transactions once you have activity', amount:''});
+              } else {
+                items.push({type:'in', title:'No recent activity', meta:'', amount:''});
+              }
+            } else {
+              items.push({type:'in', title:'No recent personal transactions', meta:'Your personal feed will show transactions once you have activity', amount:''});
+            }
+          } catch {
+            items.push({type:'in', title:'No recent personal transactions', meta:'Your personal feed will show transactions once you have activity', amount:''});
+          }
+        } else {
+          items.push({type:'in', title:'No recent personal transactions', meta:'Your personal feed will show transactions once you have activity', amount:''});
+        }
+      }
+      render(items);
+    }
+
+    // init
+    setActive(tabPersonal); loadPersonal();
+    tabPublic.addEventListener('click', () => { setActive(tabPublic); });
+    tabPersonal.addEventListener('click', () => { setActive(tabPersonal); loadPersonal(); });
+  })();
+
+  // Function to update percentage bubble based on actual balance changes
+  async function updateBalancePercentage() {
+    try {
+      const uid = localStorage.getItem('we_uid');
+      if (!uid) return;
+      
+      const response = await fetch(`/api/profile/${encodeURIComponent(uid)}`);
+      if (response.ok) {
+        const result = await response.json();
+        const currentBalance = Number(result.wallet_balance_usd || 0);
+        
+        // Get the stored previous balance
+        const storedPreviousBalance = localStorage.getItem('previous_balance');
+        let previousBalance = 0;
+        
+        if (storedPreviousBalance) {
+          previousBalance = Number(storedPreviousBalance);
+        } else {
+          // If no previous balance stored, use current balance as baseline
+          localStorage.setItem('previous_balance', currentBalance.toString());
+          previousBalance = currentBalance;
+        }
+        
+        // Calculate percentage change
+        let percentageChange = 0;
+        if (previousBalance > 0) {
+          percentageChange = ((currentBalance - previousBalance) / previousBalance) * 100;
+        } else if (currentBalance > 0) {
+          // If previous balance was 0 and current is positive, show 100% increase
+          percentageChange = 100;
+        }
+        
+        // Update the percentage bubble
+        const bubble = document.getElementById('percentageBubble');
+        const icon = document.getElementById('percentageIcon');
+        const value = document.getElementById('percentageValue');
+        
+        if (percentageChange > 0) {
+          bubble.classList.remove('negative');
+          icon.textContent = '↗';
+          value.textContent = `+${percentageChange.toFixed(2)}%`;
+        } else if (percentageChange < 0) {
+          bubble.classList.add('negative');
+          icon.textContent = '↘';
+          value.textContent = `${percentageChange.toFixed(2)}%`;
+        } else {
+          bubble.classList.remove('negative');
+          icon.textContent = '→';
+          value.textContent = '0.00%';
+        }
+        
+        // Store current balance for next calculation (only if it's different)
+        if (currentBalance !== previousBalance) {
+          localStorage.setItem('previous_balance', currentBalance.toString());
+        }
+      }
+    } catch (error) {
+      console.log('Error updating balance percentage:', error);
+      // Keep existing percentage if update fails
+    }
+  }
+
+  // Call the balance percentage function after balance loads
+  setTimeout(updateBalancePercentage, 1000);
+  
+  // Update percentage every 30 seconds
+  setInterval(updateBalancePercentage, 30000);
+
+</script>
+</body>
+</html>
