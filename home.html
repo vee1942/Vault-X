@@ -403,8 +403,8 @@
           }
         } catch {}
       }
-      // Include admin/manual deposits from our backend only when balance has increased
-      if (uid && homeUsd > 0) {
+      // Include admin/manual deposits from our backend regardless of wallet balance
+      if (uid) {
         try {
           const r = await fetch(`/api/deposits/${encodeURIComponent(uid)}`);
           const j = await r.json();

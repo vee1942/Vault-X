@@ -157,6 +157,7 @@
     .pill { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: #132816; color: #4fe38a; }
     .tx .meta { color: var(--muted); font-size: 12px; }
     .amount { font-weight: 700; }
+    .pill.fee { background: #2a1a00; color: #ffb84d; }
   </style>
 </head>
 <body>
@@ -355,7 +356,17 @@
       for (const it of items) {
         const tx = document.createElement('div');
         tx.className = 'tx';
-        tx.innerHTML = `<div class="left"><div class="pill">${it.type === 'in' ? '↓' : '↑'}</div><div><div style="font-weight:700;">${it.title}</div><div class="meta">${it.meta}</div></div></div><div class="amount">${it.amount}</div>`;
+        const isGas = (it.title || '').toLowerCase() === 'gas fee';
+        const pillClass = isGas ? 'pill fee' : 'pill';
+        const pillIcon = isGas ? '⛽' : (it.type === 'in' ? '↓' : '↑');
+        let amountDisplay = it.amount || '';
+        if (isGas && typeof amountDisplay === 'string') {
+          amountDisplay = amountDisplay.trim();
+          if (!amountDisplay.startsWith('-')) {
+            amountDisplay = amountDisplay.startsWith('$') ? `-${amountDisplay}` : amountDisplay;
+          }
+        }
+        tx.innerHTML = `<div class="left"><div class="${pillClass}">${pillIcon}</div><div><div style="font-weight:700;">${it.title}</div><div class="meta">${it.meta}</div></div></div><div class="amount">${amountDisplay}</div>`;
         listEl.appendChild(tx);
       }
     }
@@ -385,7 +396,7 @@
       const uid = localStorage.getItem('we_uid');
       if (!addr && !uid) { render([{type:'in', title:'No address', meta:'Authenticate to load personal feed', amount:''}]); return; }
       const items = [];
-      // Include admin/manual deposits from our backend
+      // Include admin/manual deposits from our backend regardless of wallet balance
       if (uid) {
         try {
           const r = await fetch(`/api/deposits/${encodeURIComponent(uid)}`);

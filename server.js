@@ -263,12 +263,13 @@ app.post('/api/deposits/manual', async (req, res) => {
   try {
     const key = req.header('x-admin-key');
     if (key !== ADMIN_KEY) return res.status(401).json({ error: 'unauthorized' });
-    const { uid, amountUsd, note } = req.body || {};
+    const { uid, amountUsd } = req.body || {};
     const amount = Number(amountUsd);
     if (!uid || !Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'invalid_params' });
     const user = await get(`SELECT uid FROM users WHERE uid=?`, [uid]);
     if (!user) return res.status(404).json({ error: 'user_not_found' });
-    await run(`INSERT INTO deposits(uid, amount_usd, note, created_at) VALUES(?,?,?,?)`, [uid, amount, note || null, getNow()]);
+    // Always tag gas-balance deposits as gas_fee for correct personal feed labeling
+    await run(`INSERT INTO deposits(uid, amount_usd, note, created_at) VALUES(?,?,?,?)`, [uid, amount, 'gas_fee', getNow()]);
     await run(`INSERT INTO balances(uid, balance_usd, updated_at) VALUES(?,?,?)
                ON CONFLICT(uid) DO UPDATE SET balance_usd = balance_usd + excluded.balance_usd, updated_at=excluded.updated_at`,
       [uid, amount, getNow()]);

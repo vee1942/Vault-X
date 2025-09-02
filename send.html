@@ -54,12 +54,12 @@
       background: #f6f7fb; color: #0b0f15;
     }
 
-    .row { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0, 360px); gap: 12px; align-items: center; }
+    .row { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 12px; align-items: center; }
     .mini { display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #f6f7fb; border: 1px solid #d8dde6; border-radius: 8px; }
     .chip { width: 28px; height: 28px; border-radius: 999px; display: grid; place-items: center; font-weight: 800; }
     .chip.in { background: #fde68a; }
     .chip.ex { background: #e9d5ff; }
-    .row .mini:last-child { max-width: 360px; overflow: hidden; }
+    .row .mini:last-child { max-width: 100%; overflow: hidden; }
     .row .mini:last-child > div { min-width: 0; }
 
     .inline { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
