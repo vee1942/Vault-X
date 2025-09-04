@@ -1,19 +1,65 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-app.use(cors());
-app.use(express.json());
+
+// Security: common HTTP headers and hide tech stack
+app.disable('x-powered-by');
+app.use(helmet({
+  frameguard: { action: 'deny' },
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
+
+// CORS: restrict to allowed origins via env; fallback to same-origin-only
+const allowedOrigins = (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+app.use(cors({
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true); // same-origin or curl
+    if (allowedOrigins.length === 0) return callback(null, false);
+    const isAllowed = allowedOrigins.includes(origin);
+    callback(isAllowed ? null : new Error('CORS not allowed'), isAllowed);
+  },
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','x-admin-key']
+}));
+app.use(express.json({ limit: '200kb' }));
+
+// Basic rate limiting on API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api/', apiLimiter);
 
 // Simple config
 const ADMIN_KEY = process.env.ADMIN_KEY || '1738';
+
+// Email configuration
+const EMAIL_CONFIG = {
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT) || 587,
+  secure: process.env.SMTP_SECURE === 'true',
+  auth: {
+    user: process.env.SMTP_USER || 'support@vault-x.site',
+    pass: process.env.SMTP_PASS || ''
+  }
+};
+
+// Create email transporter
+const emailTransporter = nodemailer.createTransporter(EMAIL_CONFIG);
 
 // Init DB
 const dbFile = process.env.DB_FILE || path.join(__dirname, 'data.sqlite');
@@ -108,6 +154,57 @@ function all(sql, params = []) {
   });
 }
 
+// Email helper function
+async function sendWelcomeEmail(email, name) {
+  try {
+    const mailOptions = {
+      from: '"Vault-X Team" <support@vault-x.site>',
+      to: email,
+      subject: 'Welcome to Vault-X! 🎉',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #333;">Hi${name ? ` ${name}` : ''},</h2>
+          
+          <p>Congratulations — and welcome to Vault-X! 🎉</p>
+          
+          <p>You've just joined a thriving community of more than 10,000 investors who have already generated over $1 billion in wealth using Vault-X.</p>
+          
+          <p>We're excited to have you on board, and we can't wait to celebrate your success with Vault-X 🚀</p>
+          
+          <p>Vault-X isn't just another investment app — it's the smarter way to grow your money.</p>
+          
+          <p>👉 <a href="https://vault-x.site" style="color: #007bff; text-decoration: none;">Log in now</a> to explore your dashboard and make your very first trade. Every great journey starts with a single investment.</p>
+          
+          <p>To growth and beyond,<br>
+          The Vault-X Team</p>
+        </div>
+      `,
+      text: `
+Hi${name ? ` ${name}` : ''},
+
+Congratulations — and welcome to Vault-X! 🎉
+
+You've just joined a thriving community of more than 10,000 investors who have already generated over $1 billion in wealth using Vault-X.
+
+We're excited to have you on board, and we can't wait to celebrate your success with Vault-X 🚀
+
+Vault-X isn't just another investment app — it's the smarter way to grow your money.
+
+👉 Log in now to explore your dashboard and make your very first trade. Every great journey starts with a single investment.
+
+To growth and beyond,
+The Vault-X Team
+      `
+    };
+
+    await emailTransporter.sendMail(mailOptions);
+    console.log(`Welcome email sent to ${email}`);
+  } catch (error) {
+    console.error(`Failed to send welcome email to ${email}:`, error.message);
+    // Don't throw error - email failure shouldn't break signup
+  }
+}
+
 // Routes
 
 // User signup with password
@@ -151,6 +248,11 @@ app.post('/api/signup', async (req, res) => {
                                       IFNULL(b.balance_usd, 0) as balance_usd,
                                       IFNULL(b.wallet_balance_usd, 0) as wallet_balance_usd
                                FROM users u LEFT JOIN balances b ON b.uid=u.uid WHERE u.uid=?`, [uid]);
+    
+    // Send welcome email (async, don't wait for it)
+    sendWelcomeEmail(email, name).catch(err => 
+      console.error('Welcome email failed:', err.message)
+    );
     
     res.json({ ok: true, profile });
   } catch (e) {
@@ -465,8 +567,17 @@ app.get('/api/percentage/current', async (req, res) => {
   }
 });
 
-// Serve static site for convenience
-app.use('/', express.static(__dirname));
+// Serve only intended static assets from project root, but block sensitive files
+app.use('/', express.static(__dirname, {
+  dotfiles: 'ignore',
+  index: ['index.html', 'home.html', 'home_updated.html'],
+  setHeaders(res, filePath) {
+    // Prevent caching of HTML; allow static caching for others via far-future handled by host/CDN
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store');
+    }
+  }
+}));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
