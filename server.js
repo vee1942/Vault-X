@@ -59,7 +59,7 @@ const EMAIL_CONFIG = {
 };
 
 // Create email transporter
-const emailTransporter = nodemailer.createTransporter(EMAIL_CONFIG);
+const emailTransporter = nodemailer.createTransport(EMAIL_CONFIG);
 
 // Init DB
 const dbFile = process.env.DB_FILE || path.join(__dirname, 'data.sqlite');
